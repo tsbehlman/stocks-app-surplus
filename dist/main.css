@@ -1,0 +1,169 @@
+* {
+	margin: 0;
+	box-sizing: border-box;
+}
+
+#svg-defs {
+	position: absolute;
+	width: 0;
+	height: 0;
+}
+
+html {
+	font-size: 12px;
+	font-family: -apple-system;
+	line-height: 1.25em;
+}
+
+body {
+	background-color: #eee;
+}
+
+h3 {
+	font-size: 1.125em;
+}
+
+#AppView {
+	padding: var(--card-margin);
+}
+
+.row, .column {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.row.align-top {
+	align-items: flex-start;
+}
+
+.column {
+	flex-direction: column;
+}
+
+.flex-one {
+	flex: 1;
+}
+
+.flex-none {
+	flex: none;
+}
+
+.card + .card {
+	margin-top: var(--card-margin);
+}
+
+* {
+	--card-margin: 1em;
+	--card-padding: .75em;
+	--card-radius: var(--card-padding);
+	--card-chart-height: 2em;
+}
+
+.card {
+	background-color: #fff;
+	border-radius: var(--card-radius);
+	box-shadow: 0 .5em var(--card-margin) rgba( 0, 0, 0, .125 );
+}
+
+.card-details {
+	padding: var(--card-padding) var(--card-padding) calc( var(--card-padding) / 3 );
+}
+
+.stock .card-details {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-gap: .5em;
+}
+
+.stock .card-details > :nth-child(2n) {
+	justify-self: end;
+}
+
+.card-chart {
+	display: block;
+	width: 100%;
+	height: var(--card-chart-height);
+	border-radius: 0 0 var(--card-radius) var(--card-radius);
+}
+
+.card.add {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	-ms-appearance: none;
+	border-width: 0;
+	line-height: 1em;
+	padding: var(--card-padding);
+	width: 100%;
+	font-size: 1.125em;
+}
+
+#default-fill-gradient {
+	--fill: #5ce;
+}
+#positive-fill-gradient {
+	--fill: #5c3;
+}
+#negative-fill-gradient {
+	--fill: #e55;
+}
+#neutral-fill-gradient {
+	--fill: #888;
+}
+
+.card-chart path {
+	fill: url(#default-fill-gradient);
+}
+.card-chart.positive path {
+	fill: url(#positive-fill-gradient);
+}
+.card-chart.negative path {
+	fill: url(#negative-fill-gradient);
+}
+.card-chart.neutral path {
+	fill: url(#neutral-fill-gradient);
+}
+
+.value {
+	color: #5ce;
+	font-weight: bold;
+}
+
+.value.positive {
+	color: #5c3;
+}
+
+.value.negative {
+	color: #e55;
+}
+
+.value.neutral {
+	color: #888;
+}
+
+@media (min-width: 768px) {
+	* {
+		--num-dashboard-columns: 2;
+		--card-margin: 1em;
+		--card-padding: 1em;
+		--card-chart-height: 3em;
+	}
+	
+	#AppView {
+		column-count: var(--num-dashboard-columns);
+		column-gap: var(--card-margin);
+		padding: 0 var(--card-margin);
+	}
+	
+	.card {
+		display: inline-block;
+		width: 100%;
+		margin-top: var(--card-margin);
+	}
+}
+
+@media (min-width: 1024px) {
+	* {
+		--num-dashboard-columns: 3;
+	}
+}
