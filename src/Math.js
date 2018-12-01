@@ -16,13 +16,6 @@ export class Point {
 	toString() {
 		return `L${this.x},${this.y}`;
 	}
-
-	extrapolate( destination ) {
-		return new Point(
-			roundToPlace( destination.x + destination.x - this.x, 3 ),
-			roundToPlace( destination.y + destination.y - this.y, 3 )
-		);
-	}
 }
 
 export class Cubic {
@@ -82,12 +75,12 @@ export function spline( points ) {
 		return points;
 	}
 
-	const curves = [ points[ 0 ] ];
+	const curves = [];
 
 	points = [
-		points[ 1 ].extrapolate( points[ 0 ] ),
+		points[ 0 ],
 		...points,
-		points[ points.length - 2 ].extrapolate( points[ points.length - 1 ] )
+		points[ points.length - 1 ]
 	];
 
 	let p0 = null;
