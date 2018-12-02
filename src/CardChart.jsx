@@ -1,34 +1,61 @@
 import S from "s-js";
+import SArray from "s-array";
 import * as Surplus from "surplus";
-import { Point, spline, roundToPlace } from "./Math.js";
+import { Cubic, roundToPlace } from "./Math.js";
 
 export const CardChart = ( points, className ) => {
-	const viewBox = S.value( "0 0 0 0" );
-	const pathData = S.value( "" );
+	const viewBox = S.data( "0 0 0 0" );
+	const pathData = S.data( "" );
 	
-	S( () => {
-		const newPoints = points();
+	let p0, p1, p2, p3;
+	let minX = +Infinity;
+	let maxX = -Infinity;
+	let minY = +Infinity;
+	let maxY = -Infinity;
+	let firstCurve;
+	let lastCurve;
+	let curves = "";
+	
+	points.forEach( point => {
+		const numPoints = S.sample( points ).length;
+		p0 = p1;
+		p1 = p2;
+		p2 = p3;
+		p3 = point;
 		
-		if( newPoints.length === 0 ) {
-			newPoints.push( new Point( 0, 0 ) );
+		maxX = point.x;
+		minY = Math.min( minY, point.y );
+		maxY = Math.max( maxY, point.y );
+		if( numPoints === 1 ) {
+			minX = point.x;
+			return;
+		}
+		if( numPoints > 2 ) {
+			if( numPoints > 3 ) {
+				const curve = Cubic.spline( p0, p1, p2, p3 );
+				minY = Math.min( minY, curve.p1.y );
+				maxY = Math.max( maxY, curve.p1.y );
+				minY = Math.min( minY, curve.p2.y );
+				maxY = Math.max( maxY, curve.p2.y );
+				curves += curve.toString();
+			}
+			else if( numPoints === 3 ) {
+				firstCurve = Cubic.spline( p1, p1, p2, p3 ).toString();
+			}
+			lastCurve = Cubic.spline( p1, p2, p3, p3 ).toString();
 		}
 		
-		const curve = spline( newPoints );
+		const pathPrefix = `M${ minX } ${ maxY }V${ S.sample( points )[ 0 ].y }`;
+		const pathSuffix = `V${ maxY }Z`;
 		
-		const minX = newPoints[ 0 ].x;
-		const maxX = newPoints[ newPoints.length - 1 ].x;
-		let minY = Infinity;
-		let maxY = -Infinity;
-		
-		for( const command of curve ) {
-			command.transform( point => {
-				minY = Math.min( minY, point.y );
-				maxY = Math.max( maxY, point.y );
-			} );
+		if( numPoints < 3 ) {
+			pathData( pathPrefix + p2 + p3 + pathSuffix );
+		}
+		else {
+			pathData( pathPrefix + firstCurve + curves + lastCurve + pathSuffix );
 		}
 		
 		viewBox( `${ minX } ${ minY } ${ roundToPlace( maxX - minX, 3 ) } ${ roundToPlace( maxY - minY, 3 ) }` );
-		pathData( `M${ minX } ${ maxY }V${ newPoints[ 0 ].y }${ curve.join( "" ) }V${ maxY }Z` );
 	} );
 	
 	return (
@@ -37,18 +64,3 @@ export const CardChart = ( points, className ) => {
 		</svg>
 	);
 };
-
-function statsForVectors( vectors ) {
-	let minY = Infinity;
-	let maxY = -Infinity;
-
-	for( const vector of vectors ) {
-		vector.transform( point => {
-			minY = Math.min( minY, point.y );
-			maxY = Math.max( maxY, point.y );
-			return point;
-		} );
-	}
-
-	return { minY, maxY };
-}
