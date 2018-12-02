@@ -15,37 +15,44 @@ export const CardChart = ( points, className ) => {
 	let firstCurve;
 	let lastCurve;
 	let curves = "";
+	let numPoints = 0;
 	
-	points.forEach( point => {
-		const numPoints = S.sample( points ).length;
-		p0 = p1;
-		p1 = p2;
-		p2 = p3;
-		p3 = point;
+	S.on( points, () => {
+		while( numPoints < points().length ) {
+			const point = points()[ numPoints++ ];
+			p0 = p1;
+			p1 = p2;
+			p2 = p3;
+			p3 = point;
+			
+			maxX = point.x;
+			minY = Math.min( minY, point.y );
+			maxY = Math.max( maxY, point.y );
+			if( numPoints === 1 ) {
+				minX = point.x;
+				continue;
+			}
+			if( numPoints > 2 ) {
+				if( numPoints > 3 ) {
+					const curve = Cubic.spline( p0, p1, p2, p3 );
+					minY = Math.min( minY, curve.p1.y );
+					maxY = Math.max( maxY, curve.p1.y );
+					minY = Math.min( minY, curve.p2.y );
+					maxY = Math.max( maxY, curve.p2.y );
+					curves += curve.toString();
+				}
+				else if( numPoints === 3 ) {
+					firstCurve = Cubic.spline( p1, p1, p2, p3 ).toString();
+				}
+				lastCurve = Cubic.spline( p1, p2, p3, p3 ).toString();
+			}
+		}
 		
-		maxX = point.x;
-		minY = Math.min( minY, point.y );
-		maxY = Math.max( maxY, point.y );
-		if( numPoints === 1 ) {
-			minX = point.x;
+		if( numPoints === 0 ) {
 			return;
 		}
-		if( numPoints > 2 ) {
-			if( numPoints > 3 ) {
-				const curve = Cubic.spline( p0, p1, p2, p3 );
-				minY = Math.min( minY, curve.p1.y );
-				maxY = Math.max( maxY, curve.p1.y );
-				minY = Math.min( minY, curve.p2.y );
-				maxY = Math.max( maxY, curve.p2.y );
-				curves += curve.toString();
-			}
-			else if( numPoints === 3 ) {
-				firstCurve = Cubic.spline( p1, p1, p2, p3 ).toString();
-			}
-			lastCurve = Cubic.spline( p1, p2, p3, p3 ).toString();
-		}
 		
-		const pathPrefix = `M${ minX } ${ maxY }V${ S.sample( points )[ 0 ].y }`;
+		const pathPrefix = `M${ minX } ${ maxY }V${ points()[ 0 ].y }`;
 		const pathSuffix = `V${ maxY }Z`;
 		
 		if( numPoints < 3 ) {
